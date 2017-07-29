@@ -9,20 +9,27 @@
 #include <iostream>
 #include "lpNotificationCenter.h"
 
-void test(void) {
-    printf("test\n");
-}
+class Data : public Notification::lpObject {
+public:
+    int value;
+};
 
+void test(Notification::lpObject *object) {
+    printf("test\n");
+    
+    Data *d = (Data *)object;
+    printf("value = %d\n", d->value);
+}
 
 int main(int argc, const char * argv[]) {
     
-    Notification::lpNotificationCenter *ins = Notification::lpNotificationCenter::defaultCenter();
-    ins->addObserver(std::string("test"), test);
-    ins->addObserver(std::string("print"), [](){ printf("this is print.\n"); });
-    ins->postNotification("print");
+    Data *data = new Data();
+    data->value = 3;
     
-    ins->removeObserver(std::string("print"));
-    ins->postNotification();    
+    Notification::lpNotificationCenter *ins = Notification::lpNotificationCenter::defaultCenter();
+    
+    ins->addObserver(std::string("data"), test, data);
+    ins->postNotification(std::string("data"));
     
     
     return 0;
