@@ -10,6 +10,11 @@
 #include <list>
 #include <unordered_map>
 
+typedef std::unordered_map<std::string, std::function<void(void)>> notification_map_type;
+typedef std::unordered_map<std::string, std::function<void(void)>>::const_iterator notification_itr_const;
+
+typedef std::function<void(void)> func_type;
+
 namespace Notification {
     class lpNotificationCenter {
     public:
@@ -27,12 +32,12 @@ namespace Notification {
         void operator=(const lpNotificationCenter&) = delete;
         
     public:
-        
-        void addObserver(std::string name, std::function<void(void)> &&f) {
-            std::pair<std::string, std::function<void(void)>> p = std::make_pair(name, f);
+        //add notifications
+        void addObserver(std::string name, func_type &&f) {
+            std::pair<std::string, func_type> p = std::make_pair(name, f);
             _map.insert(p);
         }
-        void addObserver(std::string name, std::function<void(void)> &&f, void *data) {
+        void addObserver(std::string name, func_type &&f, void *data) {
             
         }
         void removeAllObservers() {
@@ -41,7 +46,7 @@ namespace Notification {
             }
         }
         void removeObserver(std::string name) {
-            std::unordered_map<std::string, std::function<void(void)>>::iterator it = _map.find(name);
+            notification_itr_const it = _map.find(name);
             if(it != std::end(_map)) {
                 _map.erase(it);
             }
@@ -50,20 +55,20 @@ namespace Notification {
         //post notifications
         void postNotification() {
             for(auto it = _map.begin(); it != _map.end(); ++it) {
-                std::function<void(void)> f = it->second;
+                func_type f = it->second;
                 f();
             }
         }
         void postNotification(std::string name) {
-            std::unordered_map<std::string, std::function<void(void)>>::iterator it = _map.find(name);
+            notification_itr_const it = _map.find(name);
             if(it != std::end(_map)) {
-                std::function<void(void)> f = it->second;
+                func_type f = it->second;
                 f();
             }
         }
         
     private:
-        std::unordered_map<std::string, std::function<void(void)>> _map;
+        notification_map_type _map;
     };
 }
 
